@@ -1,0 +1,63 @@
+{
+  "name": "bitpit",
+  "version": "0.1.0",
+  "description": "Bitcoin wallet",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "run-s build:common build:backend build:web",
+    "build:common": "npm run build -w @bitpit/common",
+    "build:backend": "npm run build -w @bitpit/backend",
+    "build:web": "npm run build -w @bitpit/web",
+
+    "test": "JWT_SECRET=test run-s test:common test:backend test:web",
+    "test:common": "JWT_SECRET=test npm run test -w @bitpit/common",
+    "test:backend": "JWT_SECRET=test npm run test -w @bitpit/backend",
+    "test:web": "JWT_SECRET=test npm run test -w @bitpit/web",
+
+    "build+test": "run-s build test",
+    "build+test:common": "run-s build:common test:common",
+    "build+test:backend": "run-s build:backend test:backend",
+
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:web\"",
+    "dev:common": "npm run dev -w @bitpit/common",
+    "dev:backend": "npm run dev -w @bitpit/backend",
+    "dev:web": "npm run dev -w @bitpit/web",
+
+    "typecheck": "run-p typecheck:*",
+    "typecheck:common": "npm run typecheck -w @bitpit/common",
+    "typecheck:backend": "npm run typecheck -w @bitpit/backend",
+    "typecheck:web": "npm run typecheck -w @bitpit/web",
+
+    "clean": "run-p clean:*",
+    "clean:common": "npm run clean -w @bitpit/common",
+    "clean:backend": "npm run clean -w @bitpit/backend",
+    "clean:web": "npm run clean -w @bitpit/web",
+    "clean:db": "rm bitpit.db || true",
+    "clean:node_modules": "rm -rf node_modules packages/*/node_modules || true",
+
+    "format": "prettier --write \"packages/**/*.{ts,js,json,md}\"",
+    "lint": "eslint packages/**/*.ts",
+
+    "db:migrate": "npm run migrate -w @bitpit/common"
+  },
+  "engines": {
+    "node": ">=23.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^9.32.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "pino-pretty": "^13.0.0"
+  }
+}
