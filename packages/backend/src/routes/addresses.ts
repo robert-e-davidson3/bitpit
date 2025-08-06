@@ -2,7 +2,7 @@ import Router from "koa-router";
 import { Context } from "koa";
 import { z } from "zod";
 
-import { Address } from "@bitpit/common/be.js";
+import { Address, Database, Transaction } from "@bitpit/common/be.js";
 
 import { APIError } from "../middleware/error-handler.js";
 
@@ -34,7 +34,17 @@ routes.post("/", async (ctx: Context) => {
   if (!success) throw new APIError("Invalid address data", 400, error.message);
   const { address } = data;
 
-  await Address.create(ctx.db, { address, user_id: userId });
+  const { txs, final_balance: balance } = await getAddress(address);
+
+  await Address.create(ctx.db, { address, balance, user_id: userId });
+  await Transaction.create.many(
+    ctx.db,
+    txs.map((tx) => ({
+      hash: tx.hash,
+      amount: tx.out.reduce((sum, out) => sum + out.value, 0),
+      when: tx.time,
+    })),
+  );
 
   ctx.status = 201;
   ctx.body = {
@@ -63,6 +73,20 @@ routes.post("/sync/:address", async (ctx: Context) => {
 
   throw new APIError("Sync not implemented", 501);
 });
+
+async function syncTransactions(
+  db: Database,
+  txs: BlockchainComTransactionResponse[],
+) {
+  await Transaction.create.many(
+    db,
+    txs.map((tx) => ({
+      hash: tx.hash,
+      amount: tx.out.reduce((sum, out) => sum + out.value, 0),
+      when: tx.time,
+    })),
+  );
+}
 
 // Delete an address
 routes.delete("/:address", async (ctx: Context) => {
@@ -104,7 +128,7 @@ export async function getTransaction(
 
 const BlockchainComTransactionResponse = z.object({
   hash: z.string().describe("transaction hash"),
-  block_height: z.number().describe("block height"),
+  time: z.number().describe("timestamp of the transaction"),
   inputs: z
     .object({
       prev_out: z.object({

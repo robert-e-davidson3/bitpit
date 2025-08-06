@@ -7,14 +7,14 @@ export namespace Transaction {
 
   export namespace find {
     export namespace by {
-      export async function id(
+      export async function hash(
         db: Database,
-        id: number,
+        hash: string,
       ): Promise<Transaction | undefined> {
         return db
           .selectFrom("transactions")
           .selectAll()
-          .where("id", "=", id)
+          .where("hash", "=", hash)
           .executeTakeFirst();
       }
 
@@ -22,33 +22,37 @@ export namespace Transaction {
         db: Database,
         userId: number,
       ): Promise<Transaction[]> {
-        return db
+        const fromAddresses = await db
           .selectFrom("transactions")
           .selectAll()
-          .where("user_id", "=", userId)
+          .innerJoin(
+            "transaction_address_junction",
+            "transactions.hash",
+            "transaction_address_junction.hash",
+          )
+          .innerJoin(
+            "addresses",
+            "transaction_address_junction.from_address",
+            "addresses.address",
+          )
+          .where("addresses.user_id", "=", userId)
           .execute();
-      }
-
-      export async function fromAddress(
-        db: Database,
-        address: string,
-      ): Promise<Transaction[]> {
-        return db
+        const toAddresses = await db
           .selectFrom("transactions")
           .selectAll()
-          .where("from_address", "=", address)
+          .innerJoin(
+            "transaction_address_junction",
+            "transactions.hash",
+            "transaction_address_junction.hash",
+          )
+          .innerJoin(
+            "addresses",
+            "transaction_address_junction.to_address",
+            "addresses.address",
+          )
+          .where("addresses.user_id", "=", userId)
           .execute();
-      }
-
-      export async function toAddress(
-        db: Database,
-        address: string,
-      ): Promise<Transaction[]> {
-        return db
-          .selectFrom("transactions")
-          .selectAll()
-          .where("to_address", "=", address)
-          .execute();
+        return [...fromAddresses, ...toAddresses];
       }
 
       export async function address(
@@ -58,10 +62,15 @@ export namespace Transaction {
         return db
           .selectFrom("transactions")
           .selectAll()
+          .innerJoin(
+            "transaction_address_junction",
+            "transactions.hash",
+            "transaction_address_junction.hash",
+          )
           .where((eb) =>
             eb.or([
-              eb("from_address", "=", address),
-              eb("to_address", "=", address),
+              eb("transaction_address_junction.from_address", "=", address),
+              eb("transaction_address_junction.to_address", "=", address),
             ]),
           )
           .execute();
@@ -69,57 +78,52 @@ export namespace Transaction {
     }
   }
 
-  export async function create(
-    db: Database,
-    transactionData: Omit<Transaction, "id" | "created_at" | "updated_at">,
-  ): Promise<Transaction> {
-    const now = new Date().toISOString();
-    return await db
-      .insertInto("transactions")
-      .values({
-        ...transactionData,
-        created_at: now,
-        updated_at: now,
-      })
-      .returningAll()
-      .executeTakeFirstOrThrow();
+  export namespace create {
+    export async function one(
+      db: Database,
+      transactionData: Transaction,
+    ): Promise<Transaction> {
+      return await db
+        .insertInto("transactions")
+        .values(transactionData)
+        .returningAll()
+        .executeTakeFirstOrThrow();
+    }
+
+    export async function many(
+      db: Database,
+      transactions: Transaction[],
+    ): Promise<Transaction[]> {
+      return await db
+        .insertInto("transactions")
+        .values(transactions)
+        .returningAll()
+        .execute();
+    }
   }
 
   export namespace migrate {
     export async function v1(db: Database): Promise<void> {
       await db.schema
-        .createTable("addresses")
+        .createTable("transactions")
         .ifNotExists()
-        .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
-        .addColumn("user_id", "integer", (col) =>
-          col.notNull().references("users.id").onDelete("cascade"),
+        .addColumn("hash", "text", (col) => col.primaryKey().notNull())
+        .addColumn("amount", "decimal", (col) => col.notNull())
+        .addColumn("when", "datetime", (col) => col.notNull())
+        .execute();
+      await db.schema
+        .createTable("transaction_address_junction")
+        .ifNotExists()
+        .addColumn("hash", "text", (col) =>
+          col.notNull().references("transactions.hash").onDelete("cascade"),
         )
         .addColumn("from_address", "text", (col) => col.notNull())
         .addColumn("to_address", "text", (col) => col.notNull())
-        .addColumn("amount", "decimal", (col) => col.notNull())
-        .addColumn("when", "datetime", (col) => col.notNull())
-        .addColumn("created_at", "text", (col) =>
-          col.defaultTo(new Date().toISOString()).notNull(),
-        )
-        .addColumn("updated_at", "text", (col) =>
-          col.defaultTo(new Date().toISOString()).notNull(),
-        )
-        .execute();
-
-      await db.schema
-        .createIndex("idx_transactions_from_address")
-        .on("transactions")
-        .columns(["from_address"])
-        .execute();
-      await db.schema
-        .createIndex("idx_transactions_to_address")
-        .on("transactions")
-        .columns(["to_address"])
-        .execute();
-      await db.schema
-        .createIndex("idx_transactions_user_id")
-        .on("transactions")
-        .columns(["user_id"])
+        .addPrimaryKeyConstraint("pk_transaction_address_junction", [
+          "hash",
+          "from_address",
+          "to_address",
+        ])
         .execute();
     }
   }

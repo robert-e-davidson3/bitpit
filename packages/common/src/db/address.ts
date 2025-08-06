@@ -52,7 +52,7 @@ export namespace Address {
     addressData: Omit<Address, "id" | "created_at" | "updated_at">,
   ): Promise<Address> {
     const now = new Date().toISOString();
-    return await db
+    const address = await db
       .insertInto("addresses")
       .values({
         ...addressData,
@@ -61,6 +61,15 @@ export namespace Address {
       })
       .returningAll()
       .executeTakeFirstOrThrow();
+    await db
+      .insertInto("user_address_junction")
+      .values({
+        user_id: address.user_id,
+        address: address.address,
+      })
+      .execute();
+
+    return address;
   }
 
   export async function update(

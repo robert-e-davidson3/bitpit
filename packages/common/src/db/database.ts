@@ -17,7 +17,9 @@ export type Database = Kysely<Tables>;
 export interface Tables {
   users: UserTable;
   addresses: AddressTable;
+  user_address_junction: UserAddressJunctionTable;
   transactions: TransactionTable;
+  transaction_address_junction: TransactionAddressJunctionTable;
 }
 
 export interface UserTable {
@@ -26,6 +28,11 @@ export interface UserTable {
   password_hash: string;
   created_at: Generated<string>;
   updated_at: Generated<string>;
+}
+
+export interface UserAddressJunctionTable {
+  user_id: number; // Foreign key to users table
+  address: string; // Foreign key to addresses table
 }
 
 export interface AddressTable {
@@ -38,16 +45,18 @@ export interface AddressTable {
 }
 
 export interface TransactionTable {
-  id: Generated<number>;
-  user_id: number; // Foreign key to users table
-  from_address: string; // indexed
-  to_address: string; // indexed
-  amount: number;
-  when: Date; // Timestamp of the transaction
-  created_at: Generated<string>;
-  updated_at: Generated<string>;
+  hash: string; // Primary key
+  amount: number; // Amount in satoshis
+  when: number; // Timestamp of the transaction
 }
 
+export interface TransactionAddressJunctionTable {
+  hash: string;
+  from_address: string;
+  to_address: string;
+}
+
+// TODO are these being used?
 export function createDatabase(path: string): Database {
   logger.info(`Creating database connection to: ${path}`);
   const db = new SqliteDatabase(path);
