@@ -32,6 +32,7 @@ export interface AddressTable {
   id: Generated<number>;
   user_id: number; // Foreign key to users table
   address: string;
+  balance: number;
   created_at: Generated<string>;
   updated_at: Generated<string>;
 }

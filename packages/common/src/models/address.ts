@@ -9,6 +9,7 @@ export const Address = z.object({
   id: z.number(),
   user_id: z.number(),
   address: z.string(),
+  balance: z.number(),
   created_at: z.string(),
   updated_at: z.string(),
 });

@@ -16,7 +16,10 @@ routes.get("/", async (ctx: Context) => {
   const addresses = await Address.find.by.userId(ctx.db, userId);
 
   ctx.body = {
-    addresses: addresses.map((addr) => addr.address),
+    addresses: addresses.map((addr) => ({
+      address: addr.address,
+      balance: addr.balance,
+    })),
   };
 });
 
@@ -25,7 +28,9 @@ routes.post("/", async (ctx: Context) => {
   const userId = ctx.state.user?.id;
   if (!userId) throw new APIError("Unauthorized", 401);
 
-  const { success, data, error } = Address.CreateAddress.safeParse(ctx.request.body);
+  const { success, data, error } = Address.CreateAddress.safeParse(
+    ctx.request.body,
+  );
   if (!success) throw new APIError("Invalid address data", 400, error.message);
   const { address } = data;
 
@@ -37,7 +42,7 @@ routes.post("/", async (ctx: Context) => {
   };
 });
 
-// Sync transactions for an address
+// Sync balance transactions for an address
 routes.post("/sync/:address", async (ctx: Context) => {
   const userId = ctx.state.user?.id;
   if (!userId) throw new APIError("Unauthorized", 401);
@@ -49,7 +54,13 @@ routes.post("/sync/:address", async (ctx: Context) => {
   );
   if (!address) throw new APIError("Address not found", 404);
 
-  // TODO hit an API
+  const { txs, final_balance: balance } = await getAddress(ctx.params.address);
+  await Address.update(ctx.db, address.id, { balance });
+
+  for (const tx of txs) {
+    //
+  }
+
   throw new APIError("Sync not implemented", 501);
 });
 
@@ -71,48 +82,55 @@ routes.delete("/:address", async (ctx: Context) => {
 
 // TODO make this a service
 
-// https://api.blockchair.com/{:btc_chain}/raw/transaction/{:hash}
-
-const CHAIN = "bitcoin";
-
-async function getAllTransactions(address: string): Promise<RawTransaction[]> {}
-
-async function getTransactions(
+export async function getAddress(
   address: string,
-  offset: Offset = 0,
-): Promise<BlockchairTransactionsResponse[]> {
-  Offset.parse(offset); // throws if invalid
-  fetch(
-    `https://api.blockchair.com/${CHAIN}/dashboards/address/${address}?offset=${offset}`,
-  );
-  return Promise.resolve([]);
+): Promise<BlockchainComAddressResponse> {
+  const response = await fetch(`https://blockchain.info/rawaddr/${address}`);
+  if (!response.ok)
+    throw new Error(`Failed to fetch address: ${response.statusText}`);
+  const data = await response.json();
+  return BlockchainComAddressResponse.parse(data);
 }
 
-async function getTransaction(hash: string): RawTransaction {
-  const response = await fetch(
-    `https://api.blockchair.com/${CHAIN}/raw/transaction/${hash}`,
-  );
+export async function getTransaction(
+  hash: string,
+): Promise<BlockchainComTransactionResponse> {
+  const response = await fetch(`https://blockchain.info/rawtx/${hash}`);
   if (!response.ok)
     throw new Error(`Failed to fetch transaction: ${response.statusText}`);
   const data = await response.json();
-  return data.data[hash];
+  return BlockchainComTransactionResponse.parse(data);
 }
 
-const Offset = z.number().int().min(0).max(10000);
-type Offset = z.infer<typeof Offset>;
-
-const BlockchairTransactionsResponse = z.object({
-  data: z.object({
-    transactions: z.string().array().describe("transaction hashes"),
-  }),
+const BlockchainComTransactionResponse = z.object({
+  hash: z.string().describe("transaction hash"),
+  block_height: z.number().describe("block height"),
+  inputs: z
+    .object({
+      prev_out: z.object({
+        addr: z.string().describe("previous output address"),
+        value: z.number().describe("input value in satoshis"),
+      }),
+    })
+    .array()
+    .describe("input transactions"),
+  out: z
+    .object({
+      addr: z.string().describe("output address"),
+      value: z.number().describe("output value in satoshis"),
+    })
+    .array()
+    .describe("output transactions"),
 });
-type BlockchairTransactionsResponse = z.infer<
-  typeof BlockchairTransactionsResponse
+type BlockchainComTransactionResponse = z.infer<
+  typeof BlockchainComTransactionResponse
 >;
 
-export const BlockchairTransactionResponse = z.object({
-  data: z.object({
-    balance: z.number().describe("address balance in satoshis"),
-    // TODO also need the time and the addresses involved
-  }),
+const BlockchainComAddressResponse = z.object({
+  n_tx: z.number().describe("number of transactions"),
+  final_balance: z.number().describe("balance in satoshis"),
+  txs: BlockchainComTransactionResponse.array().describe("transactions"),
 });
+type BlockchainComAddressResponse = z.infer<
+  typeof BlockchainComAddressResponse
+>;

@@ -63,6 +63,23 @@ export namespace Address {
       .executeTakeFirstOrThrow();
   }
 
+  export async function update(
+    db: Database,
+    id: number,
+    addressData: Partial<Omit<Address, "id" | "created_at" | "updated_at">>,
+  ): Promise<Address> {
+    const now = new Date().toISOString();
+    return await db
+      .updateTable("addresses")
+      .set({
+        ...addressData,
+        updated_at: now,
+      })
+      .where("id", "=", id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+  }
+
   export async function remove(db: Database, id: number): Promise<void> {
     await db.deleteFrom("addresses").where("id", "=", id).execute();
   }
@@ -77,6 +94,7 @@ export namespace Address {
           col.notNull().references("users.id").onDelete("cascade"),
         )
         .addColumn("address", "text", (col) => col.notNull())
+        .addColumn("balance", "integer", (col) => col.notNull())
         .addColumn("created_at", "text", (col) =>
           col.defaultTo(new Date().toISOString()).notNull(),
         )
