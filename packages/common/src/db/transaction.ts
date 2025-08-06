@@ -7,73 +7,49 @@ export namespace Transaction {
 
   export namespace find {
     export namespace by {
-      export async function hash(
+      export async function addressAndHash(
         db: Database,
+        address: string,
         hash: string,
       ): Promise<Transaction | undefined> {
-        return db
+        const tx = await db
           .selectFrom("transactions")
           .selectAll()
           .where("hash", "=", hash)
           .executeTakeFirst();
+        if (!tx) return undefined;
+        return {
+          ...tx,
+          address,
+        };
       }
 
       export async function userId(
         db: Database,
         userId: number,
       ): Promise<Transaction[]> {
-        const fromAddresses = await db
+        const txs = await db
           .selectFrom("transactions")
           .selectAll()
-          .innerJoin(
-            "transaction_address_junction",
-            "transactions.hash",
-            "transaction_address_junction.hash",
-          )
-          .innerJoin(
-            "addresses",
-            "transaction_address_junction.from_address",
-            "addresses.address",
-          )
+          .innerJoin("addresses", "transactions.address", "addresses.address")
           .where("addresses.user_id", "=", userId)
           .execute();
-        const toAddresses = await db
-          .selectFrom("transactions")
-          .selectAll()
-          .innerJoin(
-            "transaction_address_junction",
-            "transactions.hash",
-            "transaction_address_junction.hash",
-          )
-          .innerJoin(
-            "addresses",
-            "transaction_address_junction.to_address",
-            "addresses.address",
-          )
-          .where("addresses.user_id", "=", userId)
-          .execute();
-        return [...fromAddresses, ...toAddresses];
+        return txs;
       }
 
-      export async function address(
+      export async function userIdAndAddress(
         db: Database,
+        userId: number,
         address: string,
       ): Promise<Transaction[]> {
-        return db
+        const txs = await db
           .selectFrom("transactions")
           .selectAll()
-          .innerJoin(
-            "transaction_address_junction",
-            "transactions.hash",
-            "transaction_address_junction.hash",
-          )
-          .where((eb) =>
-            eb.or([
-              eb("transaction_address_junction.from_address", "=", address),
-              eb("transaction_address_junction.to_address", "=", address),
-            ]),
-          )
+          .innerJoin("addresses", "transactions.address", "addresses.address")
+          .where("addresses.user_id", "=", userId)
+          .where("addresses.address", "=", address)
           .execute();
+        return txs;
       }
     }
   }
@@ -81,11 +57,12 @@ export namespace Transaction {
   export namespace create {
     export async function one(
       db: Database,
+      address: string,
       transactionData: Transaction,
     ): Promise<Transaction> {
-      return await db
+      return db
         .insertInto("transactions")
-        .values(transactionData)
+        .values({ ...transactionData, address })
         .returningAll()
         .executeTakeFirstOrThrow();
     }
@@ -94,11 +71,12 @@ export namespace Transaction {
       db: Database,
       transactions: Transaction[],
     ): Promise<Transaction[]> {
-      return await db
+      const txs = await db
         .insertInto("transactions")
         .values(transactions)
         .returningAll()
         .execute();
+      return txs;
     }
   }
 
@@ -108,22 +86,8 @@ export namespace Transaction {
         .createTable("transactions")
         .ifNotExists()
         .addColumn("hash", "text", (col) => col.primaryKey().notNull())
-        .addColumn("amount", "decimal", (col) => col.notNull())
-        .addColumn("when", "datetime", (col) => col.notNull())
-        .execute();
-      await db.schema
-        .createTable("transaction_address_junction")
-        .ifNotExists()
-        .addColumn("hash", "text", (col) =>
-          col.notNull().references("transactions.hash").onDelete("cascade"),
-        )
-        .addColumn("from_address", "text", (col) => col.notNull())
-        .addColumn("to_address", "text", (col) => col.notNull())
-        .addPrimaryKeyConstraint("pk_transaction_address_junction", [
-          "hash",
-          "from_address",
-          "to_address",
-        ])
+        .addColumn("address", "text", (col) => col.notNull())
+        .addColumn("raw", "text", (col) => col.notNull())
         .execute();
     }
   }

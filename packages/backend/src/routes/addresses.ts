@@ -37,14 +37,7 @@ routes.post("/", async (ctx: Context) => {
   const { txs, final_balance: balance } = await getAddress(address);
 
   await Address.create(ctx.db, { address, balance, user_id: userId });
-  await Transaction.create.many(
-    ctx.db,
-    txs.map((tx) => ({
-      hash: tx.hash,
-      amount: tx.out.reduce((sum, out) => sum + out.value, 0),
-      when: tx.time,
-    })),
-  );
+  await syncTransactions(ctx.db, address, txs);
 
   ctx.status = 201;
   ctx.body = {
@@ -66,27 +59,10 @@ routes.post("/sync/:address", async (ctx: Context) => {
 
   const { txs, final_balance: balance } = await getAddress(ctx.params.address);
   await Address.update(ctx.db, address.id, { balance });
-
-  for (const tx of txs) {
-    //
-  }
+  await syncTransactions(ctx.db, ctx.params.address, txs);
 
   throw new APIError("Sync not implemented", 501);
 });
-
-async function syncTransactions(
-  db: Database,
-  txs: BlockchainComTransactionResponse[],
-) {
-  await Transaction.create.many(
-    db,
-    txs.map((tx) => ({
-      hash: tx.hash,
-      amount: tx.out.reduce((sum, out) => sum + out.value, 0),
-      when: tx.time,
-    })),
-  );
-}
 
 // Delete an address
 routes.delete("/:address", async (ctx: Context) => {
@@ -158,3 +134,18 @@ const BlockchainComAddressResponse = z.object({
 type BlockchainComAddressResponse = z.infer<
   typeof BlockchainComAddressResponse
 >;
+
+async function syncTransactions(
+  db: Database,
+  address: string,
+  txs: BlockchainComTransactionResponse[],
+) {
+  await Transaction.create.many(
+    db,
+    txs.map((tx) => ({
+      hash: tx.hash,
+      address,
+      raw: JSON.stringify(tx),
+    })),
+  );
+}

@@ -19,7 +19,6 @@ export interface Tables {
   addresses: AddressTable;
   user_address_junction: UserAddressJunctionTable;
   transactions: TransactionTable;
-  transaction_address_junction: TransactionAddressJunctionTable;
 }
 
 export interface UserTable {
@@ -46,14 +45,8 @@ export interface AddressTable {
 
 export interface TransactionTable {
   hash: string; // Primary key
-  amount: number; // Amount in satoshis
-  when: number; // Timestamp of the transaction
-}
-
-export interface TransactionAddressJunctionTable {
-  hash: string;
-  from_address: string;
-  to_address: string;
+  address: string; // Secondary key. Address involved in the transaction
+  raw: string; // Raw transaction data as JSON string
 }
 
 // TODO are these being used?
