@@ -66,6 +66,18 @@ export namespace User {
           col.defaultTo(new Date().toISOString()).notNull(),
         )
         .execute();
+      await db.schema
+        .createTable("user_address_junction")
+        .ifNotExists()
+        .addColumn("user_id", "integer", (col) => col.notNull())
+        .addColumn("address", "text", (col) => col.notNull())
+        .addForeignKeyConstraint(
+          "user_address_junction_user_id_foreign",
+          ["user_id"],
+          "users",
+          ["id"],
+        )
+        .execute();
     }
   }
 }

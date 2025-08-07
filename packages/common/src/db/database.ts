@@ -9,6 +9,9 @@ import SqliteDatabase from "better-sqlite3";
 import { Kysely, Generated, SqliteDialect } from "kysely";
 
 import { createLogger } from "../logger.js";
+import { User } from "./user.js";
+import { Address } from "./address.js";
+import { Transaction } from "./transaction.js";
 
 const logger = createLogger("database");
 
@@ -49,9 +52,7 @@ export interface TransactionTable {
   raw: string; // Raw transaction data as JSON string
 }
 
-// TODO are these being used?
 export function createDatabase(path: string): Database {
-  logger.info(`Creating database connection to: ${path}`);
   const db = new SqliteDatabase(path);
 
   // Enable WAL mode for better concurrency
@@ -63,6 +64,11 @@ export function createDatabase(path: string): Database {
 }
 
 export function closeDatabase(db: Database): Promise<void> {
-  logger.info("Closing database connection");
   return db.destroy();
+}
+
+export async function migrateToLatest(db: Database): Promise<void> {
+  await User.migrate.v1(db);
+  await Address.migrate.v1(db);
+  await Transaction.migrate.v1(db);
 }

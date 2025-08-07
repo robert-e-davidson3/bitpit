@@ -20,6 +20,7 @@ import { errorHandler } from "../../src/middleware/error-handler.js";
 import { dbContext } from "../../src/middleware/db-context.js";
 import { authMiddleware } from "../../src/middleware/auth.js";
 import { JWT } from "../../src/util.js";
+import { migrateToLatest } from "../../../common/src/be.js";
 
 describe("Address Routes", () => {
   let db: DatabaseType;
@@ -36,8 +37,7 @@ describe("Address Routes", () => {
       }),
     });
 
-    await User.migrate.v1(db);
-    await Address.migrate.v1(db);
+    await migrateToLatest(db);
 
     app = new Koa();
     app.use(errorHandler());
@@ -79,8 +79,16 @@ describe("Address Routes", () => {
       const testAddress1 = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
       const testAddress2 = "3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy";
 
-      await Address.create(db, { user_id: testUser.id, address: testAddress1 });
-      await Address.create(db, { user_id: testUser.id, address: testAddress2 });
+      await Address.create(db, {
+        user_id: testUser.id,
+        address: testAddress1,
+        balance: 0,
+      });
+      await Address.create(db, {
+        user_id: testUser.id,
+        address: testAddress2,
+        balance: 0,
+      });
 
       const response = await request(app.callback())
         .get("/api/v1/addresses")
@@ -89,10 +97,9 @@ describe("Address Routes", () => {
 
       expect(response.body).to.have.property("addresses");
       expect(response.body.addresses).to.be.an("array").with.lengthOf(2);
-      expect(response.body.addresses).to.include.members([
-        testAddress1,
-        testAddress2,
-      ]);
+      expect(
+        response.body.addresses.map((x: any) => x.address),
+      ).to.include.members([testAddress1, testAddress2]);
     });
 
     it("should not return other users' addresses", async () => {
@@ -104,10 +111,15 @@ describe("Address Routes", () => {
       const testAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
       const otherAddress = "3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy";
 
-      await Address.create(db, { user_id: testUser.id, address: testAddress });
+      await Address.create(db, {
+        user_id: testUser.id,
+        address: testAddress,
+        balance: 0,
+      });
       await Address.create(db, {
         user_id: otherUser.id,
         address: otherAddress,
+        balance: 0,
       });
 
       const response = await request(app.callback())
@@ -116,8 +128,12 @@ describe("Address Routes", () => {
         .expect(200);
 
       expect(response.body.addresses).to.have.lengthOf(1);
-      expect(response.body.addresses).to.include(testAddress);
-      expect(response.body.addresses).to.not.include(otherAddress);
+      expect(response.body.addresses.map((x: any) => x.address)).to.include(
+        testAddress,
+      );
+      expect(response.body.addresses.map((x: any) => x.address)).to.not.include(
+        otherAddress,
+      );
     });
 
     it("should fail without authentication", async () => {
@@ -132,8 +148,8 @@ describe("Address Routes", () => {
 
   describe("POST /addresses", () => {
     it("should add a valid address", async () => {
-      const addressData = {
-        address: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+      const addressData: Address.CreateAddress = {
+        address: "3E8ociqZa9mZUSwGdSmAEMAoAxBK3FNDcd",
       };
 
       const response = await request(app.callback())
@@ -228,11 +244,15 @@ describe("Address Routes", () => {
 
     beforeEach(async () => {
       testAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
-      await Address.create(db, { user_id: testUser.id, address: testAddress });
+      await Address.create(db, {
+        user_id: testUser.id,
+        address: testAddress,
+        balance: 0,
+      });
     });
 
     it("should find the address for sync", async () => {
-      const response = await request(app.callback())
+      await request(app.callback())
         .post(`/api/v1/addresses/sync/${testAddress}`)
         .set("Authorization", `Bearer ${authToken}`)
         .expect(200);
@@ -260,6 +280,7 @@ describe("Address Routes", () => {
       await Address.create(db, {
         user_id: otherUser.id,
         address: otherAddress,
+        balance: 0,
       });
 
       const response = await request(app.callback())
@@ -286,7 +307,11 @@ describe("Address Routes", () => {
 
     beforeEach(async () => {
       testAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
-      await Address.create(db, { user_id: testUser.id, address: testAddress });
+      await Address.create(db, {
+        user_id: testUser.id,
+        address: testAddress,
+        balance: 0,
+      });
     });
 
     it("should delete an existing address", async () => {
@@ -323,6 +348,7 @@ describe("Address Routes", () => {
       await Address.create(db, {
         user_id: otherUser.id,
         address: otherAddress,
+        balance: 0,
       });
 
       const response = await request(app.callback())

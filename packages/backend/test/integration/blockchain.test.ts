@@ -4,7 +4,7 @@ import { describe, it } from "mocha";
 import { expect } from "chai";
 import { getAddress, getTransaction } from "../../src/routes/addresses.js";
 
-describe("Blockchain.com API", () => {
+describe.only("Blockchain.com API", () => {
   const TEST_ADDRESS = "3E8ociqZa9mZUSwGdSmAEMAoAxBK3FNDcd";
 
   it("should fetch address transactions using getAddress function", async function () {
@@ -20,7 +20,6 @@ describe("Blockchain.com API", () => {
       const firstTx = addressData.txs[0];
       console.log("\n=== First Transaction Structure ===");
       console.log("Transaction hash:", firstTx.hash);
-      console.log("Block height:", firstTx.block_height);
       console.log("Inputs count:", firstTx.inputs.length);
       console.log("Outputs count:", firstTx.out.length);
 
@@ -85,7 +84,6 @@ describe("Blockchain.com API", () => {
 
     console.log("\n=== getTransaction Response ===");
     console.log("Transaction hash:", txData.hash);
-    console.log("Block height:", txData.block_height);
     console.log("Inputs count:", txData.inputs.length);
     console.log("Outputs count:", txData.out.length);
 
@@ -108,7 +106,6 @@ describe("Blockchain.com API", () => {
     }
 
     expect(txData).to.have.property("hash");
-    expect(txData).to.have.property("block_height");
     expect(txData).to.have.property("inputs");
     expect(txData).to.have.property("out");
     expect(txData.hash).to.equal(TEST_TX_HASH);

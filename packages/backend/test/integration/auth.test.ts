@@ -10,7 +10,11 @@ import Koa from "koa";
 import bodyParser from "koa-bodyparser";
 import cors from "@koa/cors";
 
-import { User, type Database as DatabaseType } from "@bitpit/common/be.js";
+import {
+  migrateToLatest,
+  User,
+  type Database as DatabaseType,
+} from "@bitpit/common/be.js";
 import { createRouter } from "../../src/routes/index.js";
 import { errorHandler } from "../../src/middleware/error-handler.js";
 import { dbContext } from "../../src/middleware/db-context.js";
@@ -28,7 +32,7 @@ describe("Auth Routes", () => {
       }),
     });
 
-    await User.migrate.v1(db);
+    await migrateToLatest(db);
 
     app = new Koa();
     app.use(errorHandler());
