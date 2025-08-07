@@ -12,9 +12,12 @@ import { User, type Database as DatabaseType } from "@bitpit/common/be.js";
 import { JWT } from "../../src/util.js";
 import { migrateToLatest } from "../../../common/src/be.js";
 import { buildApp } from "../../src/index.js";
-import { MockBlockchainService } from "../helpers/mock-blockchain-service.js";
+import {
+  DEFAULT_MOCK_DATA_PATH,
+  MockBlockchainService,
+} from "../helpers/mock-blockchain-service.js";
 
-describe.skip("Assignment", () => {
+describe("Assignment", () => {
   let db: DatabaseType;
   let sqliteDb: Database.Database;
   let app: Koa;
@@ -37,7 +40,7 @@ describe.skip("Assignment", () => {
 
     await migrateToLatest(db);
 
-    app = buildApp(db, new MockBlockchainService());
+    app = buildApp(db, new MockBlockchainService(DEFAULT_MOCK_DATA_PATH));
 
     user1 = await User.create(db, {
       username: "testuser2",

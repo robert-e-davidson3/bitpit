@@ -47,8 +47,8 @@ then rolling updates could be done. Or a cron job hitting the API.
 Addresses are not verified so many users can claim the same address. They could
 be verified through signing but that's well out of scope.
 
-Due to getting rate limited, I am forced to assume that my blockchain.com
-integration works as intended.
+Integrating with the bitcoin APIs is difficult due to rate limiting. I assume
+that there is no rate limiting to keep the scope of this project small.
 
 ## Intersting Archiectural Decisions
 
@@ -60,12 +60,3 @@ It's necessary to keep the frontend from trying to import nodejs-only modules.
 This doesn't matter for this project, however.
 
 I use Zod extensively because it simplifies assurance of type over the wire.
-
-## What I'd Do Differently
-
-I have been building a side project for the past few months so I took heavily
-from there. That turned out to be a big mistake because I didn't need very much
-of that code. Hence the overbuilt project!
-
-I'd have set up a VPN so I could get past the IP blocking or build a mock of
-of the blockchain.com API to test against.

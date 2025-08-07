@@ -14,6 +14,10 @@ import {
   type Database as DatabaseType,
 } from "@bitpit/common/be.js";
 import { buildApp } from "../../src/index.js";
+import {
+  DEFAULT_MOCK_DATA_PATH,
+  MockBlockchainService,
+} from "../helpers/mock-blockchain-service.js";
 
 describe("Auth Routes", () => {
   let db: DatabaseType;
@@ -30,7 +34,7 @@ describe("Auth Routes", () => {
 
     await migrateToLatest(db);
 
-    app = buildApp(db, new MockBlockchainService());
+    app = buildApp(db, new MockBlockchainService(DEFAULT_MOCK_DATA_PATH));
   });
 
   afterEach(() => {

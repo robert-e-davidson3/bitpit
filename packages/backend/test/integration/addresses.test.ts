@@ -16,6 +16,10 @@ import {
 import { JWT } from "../../src/util.js";
 import { migrateToLatest } from "../../../common/src/be.js";
 import { buildApp } from "../../src/index.js";
+import {
+  DEFAULT_MOCK_DATA_PATH,
+  MockBlockchainService,
+} from "../helpers/mock-blockchain-service.js";
 
 describe("Address Routes", () => {
   let db: DatabaseType;
@@ -34,7 +38,7 @@ describe("Address Routes", () => {
 
     await migrateToLatest(db);
 
-    app = buildApp(db, new MockBlockchainService());
+    app = buildApp(db, new MockBlockchainService(DEFAULT_MOCK_DATA_PATH));
 
     testUser = await User.create(db, {
       username: "testuser",
