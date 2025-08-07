@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { join, dirname } from "path";
 import { Database } from "../../src/db/index.js";
-import { Transaction } from "../../src/models/transaction.js";
+import { Transaction } from "../../src/db/transaction.js";
 import {
   BlockchainService,
   BlockchainComAddressResponse,

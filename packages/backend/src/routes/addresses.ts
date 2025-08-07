@@ -22,6 +22,24 @@ routes.get("/", async (ctx: Context) => {
   };
 });
 
+// Get one address
+routes.get("/:address", async (ctx: Context) => {
+  const userId = ctx.state.user?.id;
+  if (!userId) throw new APIError("Unauthorized", 401);
+
+  const address = await Address.find.by.userIdAndAddress(
+    ctx.db,
+    userId,
+    ctx.params.address,
+  );
+  if (!address) throw new APIError("Address not found", 404);
+
+  ctx.body = {
+    address: address.address,
+    balance: address.balance,
+  };
+});
+
 // Add an address
 routes.post("/", async (ctx: Context) => {
   const userId = ctx.state.user?.id;
@@ -63,7 +81,7 @@ routes.post("/sync/:address", async (ctx: Context) => {
   await Address.update(ctx.db, address.id, { balance });
   await ctx.blockchain.syncTransactions(ctx.db, ctx.params.address, txs);
 
-  throw new APIError("Sync not implemented", 501);
+  ctx.status = 204;
 });
 
 // Delete an address

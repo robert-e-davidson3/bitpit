@@ -71,12 +71,12 @@ export namespace Transaction {
       db: Database,
       transactions: Transaction[],
     ): Promise<Transaction[]> {
-      const txs = await db
+      return db
         .insertInto("transactions")
         .values(transactions)
+        .onConflict((oc) => oc.column('hash').doNothing())
         .returningAll()
         .execute();
-      return txs;
     }
   }
 
