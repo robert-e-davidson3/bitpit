@@ -26,16 +26,11 @@ npm run db:migrate
 # Run the assignment test:
 npm run build+test:backend
 
-# Or start development servers (backend + web)
+# Start development server
 npm run dev
 
-# Or run individually:
-npm run dev:backend  # Backend API server
-npm run dev:web      # Frontend development server
-
-# Or run the backend and web in production mode:
-npm run start:backend  # Start backend in production mode
-npm run start:web      # Start web in production mode
+# Or run in production mode:
+npm run start
 
 ```
 

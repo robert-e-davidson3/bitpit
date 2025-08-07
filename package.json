@@ -8,38 +8,32 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "run-s build:common build:backend build:web",
+    "build": "run-s build:common build:backend",
     "build:common": "npm run build -w @bitpit/common",
     "build:backend": "npm run build -w @bitpit/backend",
-    "build:web": "npm run build -w @bitpit/web",
 
-    "test": "JWT_SECRET=test run-s test:common test:backend test:web",
+    "test": "JWT_SECRET=test run-s test:common test:backend",
     "test:common": "JWT_SECRET=test npm run test -w @bitpit/common",
     "test:backend": "JWT_SECRET=test npm run test -w @bitpit/backend",
-    "test:web": "JWT_SECRET=test npm run test -w @bitpit/web",
 
     "build+test": "run-s build test",
     "build+test:common": "run-s build:common test:common",
     "build+test:backend": "run-s build:common build:backend test:backend",
 
-    "start": "concurrently \"npm run start:backend\" \"npm run start:web\"",
+    "start": "npm run start:backend",
     "start:backend": "npm run start -w @bitpit/backend",
-    "start:web": "npm run start -w @bitpit/web",
 
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:web\"",
+    "dev": "npm run dev:backend",
     "dev:common": "npm run dev -w @bitpit/common",
     "dev:backend": "npm run dev -w @bitpit/backend",
-    "dev:web": "npm run dev -w @bitpit/web",
 
     "typecheck": "run-p typecheck:*",
     "typecheck:common": "npm run typecheck -w @bitpit/common",
     "typecheck:backend": "npm run typecheck -w @bitpit/backend",
-    "typecheck:web": "npm run typecheck -w @bitpit/web",
 
     "clean": "run-p clean:*",
     "clean:common": "npm run clean -w @bitpit/common",
     "clean:backend": "npm run clean -w @bitpit/backend",
-    "clean:web": "npm run clean -w @bitpit/web",
     "clean:db": "rm bitpit.db || true",
     "clean:node_modules": "rm -rf node_modules packages/*/node_modules || true",
 
