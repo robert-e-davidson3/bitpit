@@ -1,3 +1,10 @@
+/* Note to reviewer:
+- This interface to the blockchain.com API is written assuming no rate-limiting
+  exists. Since it does exist, it only works on accounts with few transactions.
+- Rate limiting can be handled a few ways. The simplest is to use a function
+  that retries when receiving a "Too many requests" failure, after a short wait.
+*/
+
 import { z } from "zod";
 
 import { Database, Transaction } from "@bitpit/common/be.js";
