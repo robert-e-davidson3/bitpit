@@ -1,8 +1,13 @@
 /* Note to reviewer:
 - This interface to the blockchain.com API is written assuming no rate-limiting
   exists. Since it does exist, it only works on accounts with few transactions.
+- As far as I can tell, blockchain.com's API is extremely limited. Maybe 10
+  calls per day?
 - Rate limiting can be handled a few ways. The simplest is to use a function
   that retries when receiving a "Too many requests" failure, after a short wait.
+  The drawback is that the function can take minutes (or hours!) to finish.
+- A more robust way to deal with rate limiting is to run such calls in a daemon.
+  It stores its state in a database and runs periodically.
 */
 
 import { z } from "zod";
