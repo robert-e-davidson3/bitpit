@@ -12,18 +12,18 @@
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "clean": "run-p clean:*",
-    "clean:dist":"rm -rf dist || true",
-    "clean:buildinfo":"rm *.tsbuildinfo || true"
+    "clean:dist": "rm -rf dist || true",
+    "clean:buildinfo": "rm *.tsbuildinfo || true"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "Backend API server for Bitpit ECS framework",
   "dependencies": {
-    "better-sqlite3": "^11.10.0",
     "@koa/cors": "^5.0.0",
     "@koa/multer": "^4.0.0",
     "bcrypt": "^5.1.1",
+    "better-sqlite3": "^11.10.0",
     "dotenv": "^16.3.1",
     "jsonwebtoken": "^9.0.2",
     "koa": "^2.15.0",
@@ -48,6 +48,7 @@
     "chai": "^4.3.0",
     "chai-as-promised": "^7.1.0",
     "mocha": "^10.0.0",
+    "npm-run-all": "^4.1.5",
     "supertest": "^6.3.0",
     "tsx": "^4.7.0",
     "typescript": "^5.8.3"
