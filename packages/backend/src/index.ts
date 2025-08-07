@@ -33,24 +33,7 @@ export async function startServer({
   db: Database;
   port?: number;
 }) {
-  const app = new Koa();
-
-  // Set up middleware
-  app.use(errorHandler());
-  app.use(
-    cors({
-      origin: NODE_ENV === "production" ? WEB_CLIENT_URL : "*",
-      credentials: true,
-    }),
-  );
-  app.use(bodyParser());
-  app.use(dbContext(db));
-  app.use(authMiddleware());
-
-  // Set up routes
-  const router = createRouter();
-  app.use(router.routes());
-  app.use(router.allowedMethods());
+  const app = buildApp(db);
 
   // Start the server
   const server = app.listen(port, () => {
@@ -70,6 +53,29 @@ export async function startServer({
   process.on("SIGTERM", shutdown);
 
   return server;
+}
+
+export function buildApp(db: Database) {
+  const app = new Koa();
+
+  // Set up middleware
+  app.use(errorHandler());
+  app.use(
+    cors({
+      origin: NODE_ENV === "production" ? WEB_CLIENT_URL : "*",
+      credentials: true,
+    }),
+  );
+  app.use(bodyParser());
+  app.use(dbContext(db));
+  app.use(authMiddleware());
+
+  // Set up routes
+  const router = createRouter();
+  app.use(router.routes());
+  app.use(router.allowedMethods());
+
+  return app;
 }
 
 // Start the server if this file is run directly
