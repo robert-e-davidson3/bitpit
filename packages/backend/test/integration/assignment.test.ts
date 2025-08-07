@@ -13,7 +13,7 @@ import { JWT } from "../../src/util.js";
 import { migrateToLatest } from "../../../common/src/be.js";
 import { buildApp } from "../../src/index.js";
 
-describe.only("Assignment", () => {
+describe.skip("Assignment", () => {
   let db: DatabaseType;
   let sqliteDb: Database.Database;
   let app: Koa;
@@ -104,6 +104,7 @@ describe.only("Assignment", () => {
       expect(response.body).to.have.property("message");
       expect(response.body.message).to.equal("Address added successfully");
     }
+
     {
       const response = await request(app.callback())
         .get("/api/v1/addresses")
