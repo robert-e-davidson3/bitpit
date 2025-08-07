@@ -11,7 +11,9 @@ import {
 import { createRouter } from "./routes/index.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { dbContext } from "./middleware/db-context.js";
+import { blockchainContext } from "./middleware/blockchain-context.js";
 import { authMiddleware } from "./middleware/auth.js";
+import { BlockchainService } from "./services/blockchain.js";
 
 const __filename = new URL(import.meta.url).pathname;
 
@@ -33,7 +35,7 @@ export async function startServer({
   db: Database;
   port?: number;
 }) {
-  const app = buildApp(db);
+  const app = buildApp(db, new BlockchainService());
 
   // Start the server
   const server = app.listen(port, () => {
@@ -55,7 +57,7 @@ export async function startServer({
   return server;
 }
 
-export function buildApp(db: Database) {
+export function buildApp(db: Database, blockchainService: BlockchainService) {
   const app = new Koa();
 
   // Set up middleware
@@ -68,6 +70,7 @@ export function buildApp(db: Database) {
   );
   app.use(bodyParser());
   app.use(dbContext(db));
+  app.use(blockchainContext(blockchainService));
   app.use(authMiddleware());
 
   // Set up routes

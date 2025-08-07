@@ -12,6 +12,7 @@ import { User, type Database as DatabaseType } from "@bitpit/common/be.js";
 import { JWT } from "../../src/util.js";
 import { migrateToLatest } from "../../../common/src/be.js";
 import { buildApp } from "../../src/index.js";
+import { MockBlockchainService } from "../helpers/mock-blockchain-service.js";
 
 describe.skip("Assignment", () => {
   let db: DatabaseType;
@@ -36,7 +37,7 @@ describe.skip("Assignment", () => {
 
     await migrateToLatest(db);
 
-    app = buildApp(db);
+    app = buildApp(db, new MockBlockchainService());
 
     user1 = await User.create(db, {
       username: "testuser2",

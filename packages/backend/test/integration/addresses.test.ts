@@ -7,20 +7,15 @@ import request from "supertest";
 import Database from "better-sqlite3";
 import { Kysely, SqliteDialect } from "kysely";
 import Koa from "koa";
-import bodyParser from "koa-bodyparser";
-import cors from "@koa/cors";
 
 import {
   User,
   Address,
   type Database as DatabaseType,
 } from "@bitpit/common/be.js";
-import { createRouter } from "../../src/routes/index.js";
-import { errorHandler } from "../../src/middleware/error-handler.js";
-import { dbContext } from "../../src/middleware/db-context.js";
-import { authMiddleware } from "../../src/middleware/auth.js";
 import { JWT } from "../../src/util.js";
 import { migrateToLatest } from "../../../common/src/be.js";
+import { buildApp } from "../../src/index.js";
 
 describe("Address Routes", () => {
   let db: DatabaseType;
@@ -39,16 +34,7 @@ describe("Address Routes", () => {
 
     await migrateToLatest(db);
 
-    app = new Koa();
-    app.use(errorHandler());
-    app.use(cors({ origin: "*", credentials: true }));
-    app.use(bodyParser());
-    app.use(dbContext(db));
-    app.use(authMiddleware());
-
-    const router = createRouter();
-    app.use(router.routes());
-    app.use(router.allowedMethods());
+    app = buildApp(db, new MockBlockchainService());
 
     testUser = await User.create(db, {
       username: "testuser",
