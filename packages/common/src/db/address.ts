@@ -114,11 +114,13 @@ export namespace Address {
 
       await db.schema
         .createIndex("idx_addresses_user_id")
+        .ifNotExists()
         .on("addresses")
         .columns(["user_id"])
         .execute();
       await db.schema
         .createIndex("idx_addresses_address")
+        .ifNotExists()
         .on("addresses")
         .columns(["address"])
         .execute();

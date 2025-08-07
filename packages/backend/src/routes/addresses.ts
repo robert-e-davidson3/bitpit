@@ -82,10 +82,31 @@ routes.delete("/:address", async (ctx: Context) => {
 
 // TODO make this a service
 
+// Gets all transactions for an address
 export async function getAddress(
   address: string,
 ): Promise<BlockchainComAddressResponse> {
-  const response = await fetch(`https://blockchain.info/rawaddr/${address}`);
+  const addr = await getAddressOnce(address);
+  const total = addr.n_tx;
+  if (total <= 50) return addr;
+
+  let offset = 50;
+  while (offset < total) {
+    const more = await getAddressOnce(address, offset);
+    addr.txs.push(...more.txs);
+    offset += 50;
+  }
+
+  return addr;
+}
+
+export async function getAddressOnce(
+  address: string,
+  offset: number = 0,
+): Promise<BlockchainComAddressResponse> {
+  const response = await fetch(
+    `https://blockchain.info/rawaddr/${address}?offset=${offset}`,
+  );
   if (!response.ok)
     throw new Error(`Failed to fetch address: ${response.statusText}`);
   const data = await response.json();

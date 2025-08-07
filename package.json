@@ -22,6 +22,10 @@
     "build+test:common": "run-s build:common test:common",
     "build+test:backend": "run-s build:common build:backend test:backend",
 
+    "start": "concurrently \"npm run start:backend\" \"npm run start:web\"",
+    "start:backend": "npm run start -w @bitpit/backend",
+    "start:web": "npm run start -w @bitpit/web",
+
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:web\"",
     "dev:common": "npm run dev -w @bitpit/common",
     "dev:backend": "npm run dev -w @bitpit/backend",
