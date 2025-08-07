@@ -4,7 +4,7 @@ import { describe, it } from "mocha";
 import { expect } from "chai";
 import { getAddress, getTransaction } from "../../src/routes/addresses.js";
 
-describe.only("Blockchain.com API", () => {
+describe.skip("Blockchain.com API", () => {
   const TEST_ADDRESS = "3E8ociqZa9mZUSwGdSmAEMAoAxBK3FNDcd";
 
   it("should fetch address transactions using getAddress function", async function () {
