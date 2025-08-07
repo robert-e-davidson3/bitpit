@@ -8,31 +8,25 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "run-s build:common build:backend",
-    "build:common": "npm run build -w @bitpit/common",
+    "build": "npm run build:backend",
     "build:backend": "npm run build -w @bitpit/backend",
 
-    "test": "JWT_SECRET=test run-s test:common test:backend",
-    "test:common": "JWT_SECRET=test npm run test -w @bitpit/common",
+    "test": "JWT_SECRET=test npm run test:backend",
     "test:backend": "JWT_SECRET=test npm run test -w @bitpit/backend",
 
     "build+test": "run-s build test",
-    "build+test:common": "run-s build:common test:common",
-    "build+test:backend": "run-s build:common build:backend test:backend",
+    "build+test:backend": "run-s build:backend test:backend",
 
     "start": "npm run start:backend",
     "start:backend": "npm run start -w @bitpit/backend",
 
     "dev": "npm run dev:backend",
-    "dev:common": "npm run dev -w @bitpit/common",
     "dev:backend": "npm run dev -w @bitpit/backend",
 
-    "typecheck": "run-p typecheck:*",
-    "typecheck:common": "npm run typecheck -w @bitpit/common",
+    "typecheck": "npm run typecheck:backend",
     "typecheck:backend": "npm run typecheck -w @bitpit/backend",
 
     "clean": "run-p clean:*",
-    "clean:common": "npm run clean -w @bitpit/common",
     "clean:backend": "npm run clean -w @bitpit/backend",
     "clean:db": "rm bitpit.db || true",
     "clean:node_modules": "rm -rf node_modules packages/*/node_modules || true",
@@ -40,7 +34,7 @@
     "format": "prettier --write \"packages/**/*.{ts,js,json,md}\"",
     "lint": "eslint packages/**/*.ts",
 
-    "db:migrate": "npm run migrate -w @bitpit/common"
+    "db:migrate": "npm run migrate -w @bitpit/backend"
   },
   "engines": {
     "node": ">=23.0.0"

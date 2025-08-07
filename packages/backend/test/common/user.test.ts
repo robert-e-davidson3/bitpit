@@ -9,8 +9,8 @@ import { Kysely, SqliteDialect } from "kysely";
 
 use(chaiAsPromised);
 
-import { User } from "../src/be.js";
-import type { Database as DatabaseType } from "../src/db/database.js";
+import { User } from "../../src/db/user.js";
+import type { Database as DatabaseType } from "../../src/db/database.js";
 
 describe("User", () => {
   let db: DatabaseType;

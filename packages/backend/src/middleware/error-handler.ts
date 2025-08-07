@@ -1,7 +1,7 @@
 import { Context, Next } from "koa";
 import { uuidv7 } from "uuidv7";
 
-import { createLogger } from "@bitpit/common/be.js";
+import { createLogger } from "../logger.js";
 
 const NODE_ENV = process.env.NODE_ENV || "development";
 

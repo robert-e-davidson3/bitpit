@@ -2,7 +2,8 @@ import { z } from "zod";
 import { readFileSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { join, dirname } from "path";
-import { Database, Transaction } from "@bitpit/common/be.js";
+import { Database } from "../../src/db/index.js";
+import { Transaction } from "../../src/models/transaction.js";
 import {
   BlockchainService,
   BlockchainComAddressResponse,

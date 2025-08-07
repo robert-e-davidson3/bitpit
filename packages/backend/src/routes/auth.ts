@@ -1,7 +1,8 @@
 import Router from "koa-router";
 import { Context } from "koa";
 
-import { Auth, User } from "@bitpit/common/be.js";
+import { Auth } from "../models/auth.js";
+import { User } from "../db/user.js";
 
 import { APIError } from "../middleware/error-handler.js";
 import { Password, JWT } from "../util.js";

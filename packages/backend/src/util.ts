@@ -2,7 +2,7 @@ import { z } from "zod";
 import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
-import { getEnvVariable } from "@bitpit/common/be.js";
+import { getEnvVariable } from "./env.js";
 
 export namespace JWT {
   export const SECRET = getEnvVariable("JWT_SECRET");

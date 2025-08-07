@@ -2,11 +2,8 @@ import Koa from "koa";
 import bodyParser from "koa-bodyparser";
 import cors from "@koa/cors";
 
-import {
-  createLogger,
-  createDatabase,
-  type Database,
-} from "@bitpit/common/be.js";
+import { createLogger } from "./logger.js";
+import { createDatabase, type Database } from "./db/index.js";
 
 import { createRouter } from "./routes/index.js";
 import { errorHandler } from "./middleware/error-handler.js";

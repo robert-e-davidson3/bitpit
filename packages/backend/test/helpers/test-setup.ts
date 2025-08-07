@@ -3,16 +3,9 @@ import bodyParser from "koa-bodyparser";
 import cors from "@koa/cors";
 import jwt from "jsonwebtoken";
 
-import {
-  createDatabase,
-  closeDatabase,
-  DB,
-  getEnvVariable,
-  Component,
-  UserComponent,
-  UserAuthComponent,
-  EmailAddressComponent,
-} from "@bitpit/common/be.js";
+import { createDatabase, closeDatabase, DB } from "../../src/db/index.js";
+import { getEnvVariable } from "../../src/env.js";
+import { Component, UserComponent, UserAuthComponent, EmailAddressComponent } from "../../src/models/component.js";
 
 import { createRouter } from "../../src/routes/index.js";
 import { errorHandler } from "../../src/middleware/error-handler.js";

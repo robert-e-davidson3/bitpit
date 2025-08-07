@@ -8,11 +8,9 @@ import Database from "better-sqlite3";
 import { Kysely, SqliteDialect } from "kysely";
 import Koa from "koa";
 
-import {
-  migrateToLatest,
-  User,
-  type Database as DatabaseType,
-} from "@bitpit/common/be.js";
+import { migrateToLatest } from "../../src/db/index.js";
+import { User } from "../../src/db/user.js";
+import { type Database as DatabaseType } from "../../src/db/index.js";
 import { buildApp } from "../../src/index.js";
 import {
   DEFAULT_MOCK_DATA_PATH,

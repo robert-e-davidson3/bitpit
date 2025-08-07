@@ -1,7 +1,7 @@
 import Router from "koa-router";
 import { Context } from "koa";
 
-import { Transaction } from "@bitpit/common/be.js";
+import { Transaction } from "../db/transaction.js";
 
 import { APIError } from "../middleware/error-handler.js";
 

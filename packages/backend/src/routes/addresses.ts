@@ -1,8 +1,7 @@
 import Router from "koa-router";
 import { Context } from "koa";
-import { z } from "zod";
 
-import { Address, Database, Transaction } from "@bitpit/common/be.js";
+import { Address } from "../db/address.js";
 
 import { APIError } from "../middleware/error-handler.js";
 
@@ -34,7 +33,8 @@ routes.post("/", async (ctx: Context) => {
   if (!success) throw new APIError("Invalid address data", 400, error.message);
   const { address } = data;
 
-  const { txs, final_balance: balance } = await ctx.blockchain.getAddress(address);
+  const { txs, final_balance: balance } =
+    await ctx.blockchain.getAddress(address);
 
   await Address.create(ctx.db, { address, balance, user_id: userId });
   await ctx.blockchain.syncTransactions(ctx.db, address, txs);
@@ -57,7 +57,9 @@ routes.post("/sync/:address", async (ctx: Context) => {
   );
   if (!address) throw new APIError("Address not found", 404);
 
-  const { txs, final_balance: balance } = await ctx.blockchain.getAddress(ctx.params.address);
+  const { txs, final_balance: balance } = await ctx.blockchain.getAddress(
+    ctx.params.address,
+  );
   await Address.update(ctx.db, address.id, { balance });
   await ctx.blockchain.syncTransactions(ctx.db, ctx.params.address, txs);
 
@@ -79,4 +81,3 @@ routes.delete("/:address", async (ctx: Context) => {
 
   ctx.status = 204;
 });
-

@@ -12,7 +12,8 @@
 
 import { z } from "zod";
 
-import { Database, Transaction } from "@bitpit/common/be.js";
+import { Database } from "../db/index.js";
+import { Transaction } from "../db/transaction.js";
 
 export interface BlockchainService {
   getAddress(address: string): Promise<BlockchainComAddressResponse>;

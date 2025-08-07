@@ -1,6 +1,6 @@
 import { Context, Next } from "koa";
 
-import { User } from "@bitpit/common/be.js";
+import { User } from "../db/user.js";
 import { JWT } from "../util.js";
 
 export function authMiddleware() {
