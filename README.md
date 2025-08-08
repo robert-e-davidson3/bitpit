@@ -24,7 +24,7 @@ npm run build
 npm run db:migrate
 
 # Run the assignment test:
-npm run build+test:backend
+npm run test
 
 # Start development server
 npm run dev
