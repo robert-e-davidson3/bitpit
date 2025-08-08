@@ -1,6 +1,6 @@
 # BitPit
 
-A Bitcoin wallet application built with a modern TypeScript monorepo architecture.
+A Bitcoin wallet application.
 
 ## Prerequisites
 
@@ -45,7 +45,7 @@ be verified through signing but that's well out of scope.
 Integrating with the bitcoin APIs is difficult due to rate limiting. I assume
 that there is no rate limiting to keep the scope of this project small.
 
-## Intersting Archiectural Decisions
+## Interesting Architectural Decisions
 
 I went with an HTTP API because it's familiar and CoinTracker is a SaaS product
 so that's what I'd be building (I assume).
